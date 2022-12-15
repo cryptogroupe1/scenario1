@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link href="style.css" rel="stylesheet">
+    <title>authentication</title>
+</head>
+<body>
+<h1 style="text-align: center">Bienvenue dans la page d'acceuil du site de realisation du scenario 1</h1>
+<p style="text-align: center">Renseignez vos informations d'identifications pour accèder aux fonctionnalités de notre application</p>
+<div id="form" style="text-align: center">
+    {% if email is defined %}
+    {{ email }}---------
+    {%else %}
+    {{ form_start(form) }}
+    {{ form_row(form.email) }}
+    {{ form_rest(form) }}
+</div>
+
+<div id="getPwd" style="text-align: center">
+    <a href="http://localhost:8000/forget">Mot de passe oublié ?</a>
+s
+    {% endif %}
+</div>
+</body>
+</html>
