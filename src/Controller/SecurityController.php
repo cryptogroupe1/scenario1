@@ -17,7 +17,7 @@ class SecurityController extends AbstractController
 
     public function __construct(private ManagerRegistry $managerRegistry){}
 
-    #[Route(path: '/', name: 'app_login')]
+    #[Route(path: '/login', name: 'app_login')]
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
         // if ($this->getUser()) {
@@ -29,7 +29,7 @@ class SecurityController extends AbstractController
         // last username entered by the user
         $lastUsername = $authenticationUtils->getLastUsername();
 
-        return $this->render('security/login.html.twig', ['last_username' => $lastUsername, 'error' => $error]);
+        return $this->render('security/login.html.twig', ['last_username' => $lastUsername, 'error' => $error, 'isConnected'=>true]);
     }
 
     #[Route(path: '/logout', name: 'app_logout')]
@@ -42,18 +42,30 @@ class SecurityController extends AbstractController
     #[Route('/forget', name: 'user.forget')]
     public function changeLoginAndpassword(Request $request){
         $user = new User();
+        $mailSend = false;
         $form = $this->createForm(UserType::class, $user);
         $form->remove("password");
         $form->handleRequest($request);
 
 
         if ($form->isSubmitted()) {
-            $message = 'Un email a été envoyé à votre adreese; veillez vous rendre dans la boite de reception pour créer de nouveaux identifiants !';
-            self::sendMail('echo "Cliquez sur le lien pour changer vos informations d\'identifications : http://localhost:8000/updateLoginAndPassword" | mail -s "Informations d\'identification" '.$user->getUserIdentifier());
-            return $this->render('security/changeLoginAndPassword.html.twig', ['message' => $message]);
+            $doctrine = $this->managerRegistry->getRepository(User::class);
+            $user_database = $doctrine->findAll();
+
+            for ($i = 0; $i< count($user_database); $i++){
+                if ($user_database[$i]->getUserIdentifier() == $user->getUserIdentifier()){
+                    $message = 'Un email a été envoyé à votre adreese; veillez vous rendre dans la boite de reception pour créer de nouveaux identifiants !';
+                    self::sendMail('echo "Cliquez sur le lien pour changer vos informations d\'identifications : http://localhost:8000/updateLoginAndPassword/'.$user_database[$i]->getId().'" | mail -s "Informations d\'identification" '.$user->getUserIdentifier());
+                    $mailSend = true;
+                }
+            }
+            if (!$mailSend)
+                $message = "Il n'y a pas de compte avec cette addresse";
+
+            return $this->render('user/changeLoginAndPassword.html.twig', ['message' => $message]);
         }
         else{
-            return $this->render('security/changeLoginAndPassword.html.twig', ['form'=>$form->createView()]);
+            return $this->render('user/changeLoginAndPassword.html.twig', ['form'=>$form->createView()]);
         }
     }
 

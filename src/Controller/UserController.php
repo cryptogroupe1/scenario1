@@ -34,30 +34,38 @@ class UserController extends AbstractController
     }
 
 
-    #[Route('/updateLoginAndPassword')]
+    #[Route('/updateLoginAndPassword/{id?0}')]
     public function updateLoginAndPassword(Request $request, User $user = null){
-        if (!$user){
-            $new = true;
-            $user = new User();
-        }
+        $in_database = false;
 
-        $form = $this->createForm(UserType::class, $user);
+        if ($user==null)
+           $user = new User();
+           $user2 = new User();
+
+
+        $form = $this->createForm(UserType::class, $user2);
+       $form->remove('email');
+
+       // $user2->setEmail($user->getUserIdentifier());
         $form->handleRequest($request);
 
         if ($form->isSubmitted()){
+           // dd($user2);
+            $user->setPassword($user2->getPassword());
             $manager = $this->manager->getManager();
             $manager->persist($user);
             $manager->flush();
 
-            $message = 'l\'utilisateur a été mis à jour avec succès !';
+            $message = 'les identifiants ont été mis à jour avec succès a été mis à jour avec succès !';
             $this->addFlash('success', $message);
 
             return $this->redirectToRoute('user.list.alls');
         }
         else{
-            return $this->render('user/add_user.html.twig', ['form' => $form->createView()]);
+                return $this->render('user/setPassword.html.twig', ['form'=>$form->createView()]);
         }
     }
+    /*
     #[Route('/add', name: 'user.add')]
     public function addUser(Request $request){
         $user = new User();
@@ -126,4 +134,6 @@ class UserController extends AbstractController
             return $this->redirectToRoute('user.list.alls');
         }
     }
+
+    */
 }
